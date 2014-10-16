@@ -1,3 +1,9 @@
+// *************************************************************
+// Neomatilde Code
+// Lhrod: anphora@gmail.com
+// Code for matilde
+// **************************************************************
+
 #include <matilde_message.h>
 #include <SPI.h>
 #include <RF24.h>
