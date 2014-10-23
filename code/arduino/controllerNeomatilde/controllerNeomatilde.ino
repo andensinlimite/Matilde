@@ -39,195 +39,70 @@ void setup(void)
 void loop()
 {
   Message response;
-  MessageDataArray responseData;
   bool ok = false;
   int tmp;
-  int *l;
   if (Serial.available())
   {
     int c = Serial.read();
-    //char c = Serial.read();
-#ifdef DEBUG
-#endif
     switch (c) {
       case PING:
         ok=ping();
-#ifdef DEBUG
-      Serial.println((ok) ? "PONG OK" : "PONG FAILED");
-#endif
         break;
-      case '1':
+      case LED_HIGH:
         ok = sendSimpleCommand(LED_HIGH);
         break;
-      case '2':
+      case LED_LOW:
         ok = sendSimpleCommand(LED_LOW);
-        break;
-      case 'c':
-        for (int i = 0; i < 10; i++)
-        {
-          Serial.print(i);
-          Serial.print(": ");
-          ok = ping();
-
-          Serial.println((ok) ? "PONG OK" : "PONG FAILED");
-
-          if (ok)
-            i=10;
-        }
-        break;
-        
-      case 'y':
+        break;        
+      case FORWARD_TIME:
         tmp = Serial.parseInt();
-          ok = sendSimpleCommand(FORWARD_TIME, tmp);
+        ok = sendSimpleCommand(FORWARD_TIME, tmp);
         break;
-      case 'h':
+      case BACKWARD_TIME:
         tmp = Serial.parseInt();
-          ok = sendSimpleCommand(BACKWARD_TIME, tmp);
+        ok = sendSimpleCommand(BACKWARD_TIME, tmp);
         break;
-      case 'g':
+      case TURN_RIGHT_TIME:
         tmp = Serial.parseInt();
-          ok = sendSimpleCommand(TURN_RIGHT_TIME, tmp);
+        ok = sendSimpleCommand(TURN_RIGHT_TIME, tmp);
         break;
-      case 'j':
+      case TURN_LEFT_TIME:
         tmp = Serial.parseInt();
         ok = sendSimpleCommand(TURN_LEFT_TIME, tmp);
         break;
-        
-      case 'f':
-        tmp = Serial.parseInt();
-        if (tmp != 0)
-          ok = sendSimpleCommand(FORWARD_UNTIL, tmp);
-        else
-          ok = sendSimpleCommand(FORWARD);
-        break;
-      case 'b':
-        tmp = Serial.parseInt();
-        if (tmp != 0)
-          ok = sendSimpleCommand(BACKWARD_UNTIL, tmp);
-        else
-          ok = sendSimpleCommand(BACKWARD);
-        break;
-      case 's':
+      case STOP:
         ok = sendSimpleCommand(STOP);
         break;
-      case 'r':
-        tmp = Serial.parseInt();
-        if (tmp != 0)
-          ok = sendSimpleCommand(TURN_RIGHT_UNTIL, tmp);
-        else
-          ok = sendSimpleCommand(TURN_RIGHT);
-        break;
-      case 'l':
-        tmp = Serial.parseInt();
-        if (tmp != 0)
-          ok = sendSimpleCommand(TURN_LEFT_UNTIL, tmp);
-        else
-          ok = sendSimpleCommand(TURN_LEFT);
-        break;
-      case 'v':
+      case CHANGE_VEL:
         ok = sendSimpleCommand(CHANGE_VEL, Serial.parseInt());
         break;
-      case 'w':
+      case WHAT_VEL:
         ok = sendSimpleCommand(WHAT_VEL);
         readWaitedMessage(&response, RESPONSE_VEL);
         if (ok) {
-          Serial.print("Vel: ");
           Serial.println(response.arg);
         }
         break;
-      case '-':
-        radio.powerDown(); 
-        delay(500);
-        radio.powerUp();
-        ok = true;
-        break;
-      case 'p':
+      case READ_PIN:
         ok = sendSimpleCommand(READ_PIN, Serial.parseInt());
         readWaitedMessage(&response, VAL_PIN);
         if (ok) {
-          Serial.print("Pin: ");
           Serial.println(response.arg);
         }
         break;
-      case 'm':
+      case PLAY_INIC_MUSIC:
         ok = sendSimpleCommand(PLAY_INIC_MUSIC);
         break;
-      case 'q':
-        ok = sendSimpleCommand(WHAT_COUNTERS);
-        readWaitedMessageData(&responseData, RESPONSE_COUNTERS);
-        if (ok) {
-            Serial.print("Counter: ");
-            int *l;
-            l = (int *)responseData.arg;
-            Serial.print(*l);
-            l+=sizeof(int);
-            Serial.print(" ");
-            Serial.print(*l);
-            Serial.println(" ");
-        }
-        break;
-      case '9':
-        for (int i=0; i < 20; i++)
-        {
-          ok = sendSimpleCommand(WHAT_COUNTERS);
-          readWaitedMessageData(&responseData, RESPONSE_COUNTERS);
-          if (ok) {
-            Serial.print("Counter: ");
-            int *l;
-            l = (int *)responseData.arg;
-            Serial.print(*l);
-            l+=sizeof(int);
-            Serial.print(" ");
-            Serial.print(*l);
-            Serial.println(" ");
-          }
-          delay(250);
-        }
-        break;
-      case '7':
-              ok = sendSimpleCommand(WHAT_DIRECTIONS);
-              readWaitedMessageData(&responseData, RESPONSE_DIRECTIONS);
-              if (ok) {
-                Serial.print("Directions: ");
-                l = (int *)responseData.arg;
-                Serial.print(*l);
-                l+=sizeof(int);
-                Serial.print(" ");
-                Serial.print(*l);
-                Serial.println(" ");
-              }
-            delay(250);
-        break;
-      case 'd':
-              ok = sendSimpleCommand(DEBUG_COUNTER_A);
-              readWaitedMessageData(&responseData, DEBUG_RESPONSE_A);
-              if (ok) {
-                Serial.print("Counters A: ");
-                l = (int *)responseData.arg;
-                for (int i = 0; i < 8; i++)
-                {
-                  Serial.print(*l);
-                  l+=sizeof(int);
-                  Serial.print(" ");
-                }
-                Serial.println(" ");
-              }
-            delay(250);
-        break;
-      case '8':
+      case WHAT_BATTERY:
         ok = sendSimpleCommand(WHAT_BATTERY);
         readWaitedMessage(&response, RESPONSE_BATTERY);
         float k = ((((float)response.arg)/1023.0)*5.0);
         k =  k * RA_DIV_RARB;
         if (ok) {
-          Serial.print("batery: ");
-          Serial.print(response.arg);
-          Serial.print(": ");
-          Serial.print(k);
-          Serial.println("v");
+          Serial.println(k);
         }
         break;
     }
-    Serial.println((ok) ? "COMMAND OK" : "COMMAND FAILED");
+    Serial.println((ok) ? "OK" : "FAILED");
   }
 }
